@@ -1,0 +1,110 @@
+﻿@model LanguageSelectorModel
+
+@inject Nop.Core.IWebHelper webHelper
+
+@if (Model.AvailableLanguages.Count > 1)
+{
+    <style>
+        .language-selector {
+            position: relative;
+        }
+        .language-selector select {
+            padding: 6px 35px 6px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #212529;
+            font-weight: 500;
+            min-width: 140px;
+            width: auto;
+            max-width: 220px;
+            line-height: 1.4;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 10px;
+        }
+        .language-selector select option {
+            color: #212529;
+            font-weight: 500;
+            background: white;
+        }
+        .language-selector select:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+        }
+        .language-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        .language-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .language-list li {
+            margin: 0;
+        }
+        .language-list li a {
+            display: block;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .language-list li a:hover {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+        .language-list li a img.selected {
+            border: 2px solid #667eea;
+            border-radius: 4px;
+        }
+        .language-list li a img {
+            display: block;
+            width: 24px;
+            height: 18px;
+            object-fit: cover;
+            border-radius: 2px;
+        }
+    </style>
+    <div class="language-selector">
+    @{
+        var returnUrl = webHelper.GetRawUrl(Context.Request);
+
+        if (Model.UseImages)
+        {
+            <ul class="language-list">
+                @foreach (var lang in Model.AvailableLanguages)
+                {
+                    <li>
+                        <a href="@Url.RouteUrl(NopRouteNames.Standard.CHANGE_LANGUAGE, new { langid = lang.Id, returnUrl }, webHelper.GetCurrentRequestProtocol())" title="@lang.Name">
+                            <img title='@lang.Name' alt='@lang.Name' @(lang.Id == Model.CurrentLanguageId ? " class=selected" : null)
+                                 src="@Url.Content("~/images/flags/" + @lang.FlagImageFileName) "/>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            var languages = await Model.AvailableLanguages.SelectAwait(async lang => new SelectListItem
+            {
+                Text = lang.Name,
+                Value = Url.RouteUrl(NopRouteNames.Standard.CHANGE_LANGUAGE, new { langid = lang.Id, returnUrl }, webHelper.GetCurrentRequestProtocol()),
+                Selected = lang.Id.Equals(Model.CurrentLanguageId)
+            }).ToListAsync();
+
+            <select id="customerlanguage" name="customerlanguage" asp-items="@languages" onchange="setLocation(this.value);" aria-label="@T("Languages.Selector.Label")"></select>
+        }
+    }
+    </div>
+}

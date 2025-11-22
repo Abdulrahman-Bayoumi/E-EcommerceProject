@@ -1,0 +1,124 @@
+﻿<header class="header" style="background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: relative; z-index: 1000; width: 100%;">
+    <style>
+        .header {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        .header-upper {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid #dee2e6;
+            padding: 6px 0;
+            width: 100%;
+        }
+        .header-upper .container-fluid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 0 15px;
+        }
+        .header-selectors-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .header-selectors-wrapper > div {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+        /* Ensure selectors are visible and styled consistently */
+        .header-selectors-wrapper .language-selector,
+        .header-selectors-wrapper .currency-selector,
+        .header-selectors-wrapper .tax-display-type-selector {
+            display: inline-block;
+        }
+        .header-links-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .header-lower {
+            padding: 25px 0;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            width: 100%;
+        }
+        .header-lower .container-fluid {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 0 15px;
+        }
+        .header-logo {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .header-logo a img {
+            max-height: 60px;
+            transition: transform 0.3s ease;
+        }
+        .header-logo a:hover img {
+            transform: scale(1.05);
+        }
+        .search-box {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        @@media (min-width: 768px) {
+            .header-upper .container-fluid {
+                padding: 0 30px;
+            }
+            .header-selectors-wrapper {
+                justify-content: flex-start;
+            }
+            .header-links-wrapper {
+                justify-content: flex-end;
+            }
+            .header-lower .container-fluid {
+                padding: 0 30px;
+            }
+            .header-logo {
+                margin-bottom: 0;
+                flex: 0 0 auto;
+            }
+            .search-box {
+                flex: 0 1 auto;
+                max-width: 450px;
+                margin: 0 0 0 30px;
+            }
+        }
+    </style>
+    <a class="skip" href="#main">@T("Header.SkipNavigation.Text")</a>
+    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderBefore })
+    <div class="header-upper">
+        <div class="container-fluid">
+            <div class="header-selectors-wrapper">
+                @await Component.InvokeAsync(typeof(TaxTypeSelectorViewComponent))
+                @await Component.InvokeAsync(typeof(CurrencySelectorViewComponent))
+                @await Component.InvokeAsync(typeof(LanguageSelectorViewComponent))
+                @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderSelectors })
+            </div>
+            <div class="header-links-wrapper">
+                @await Component.InvokeAsync(typeof(HeaderLinksViewComponent))
+                @await Component.InvokeAsync(typeof(FlyoutShoppingCartViewComponent))
+            </div>
+        </div>
+    </div>
+    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderMiddle })
+    <div class="header-lower">
+        <div class="container-fluid">
+            <div class="header-logo">
+                @await Component.InvokeAsync(typeof(LogoViewComponent))
+            </div>
+            <div role="search" class="search-box store-search-box">
+                @await Component.InvokeAsync(typeof(SearchBoxViewComponent))
+            </div>
+        </div>
+    </div>
+    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderAfter })
+</header>

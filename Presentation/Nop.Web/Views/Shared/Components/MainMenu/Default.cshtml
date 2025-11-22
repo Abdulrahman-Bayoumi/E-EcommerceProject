@@ -1,0 +1,172 @@
+﻿@model MenuModel
+
+@using Nop.Core.Domain.Menus;
+
+<style>
+    .main-menu-navbar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 0;
+        border-top: 2px solid rgba(255,255,255,0.1);
+    }
+    .main-menu-navbar .navbar-nav {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: center;
+    }
+    .main-menu-navbar .nav-item {
+        position: relative;
+    }
+    .main-menu-navbar .nav-link {
+        color: white !important;
+        font-weight: 600;
+        padding: 18px 25px !important;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .main-menu-navbar .nav-link:hover,
+    .main-menu-navbar .nav-link:focus {
+        background-color: rgba(255,255,255,0.15);
+        color: white !important;
+    }
+    .main-menu-navbar .nav-link i {
+        font-size: 16px;
+    }
+    .main-menu-navbar .dropdown-menu {
+        border: none;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        border-radius: 8px;
+        margin-top: 5px;
+        padding: 15px 0;
+        min-width: 250px;
+    }
+    .main-menu-navbar .dropdown-item {
+        padding: 12px 25px;
+        color: #333;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .main-menu-navbar .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #007bff;
+        padding-right: 30px;
+    }
+    .main-menu-navbar .dropdown-item i {
+        color: #007bff;
+        font-size: 14px;
+    }
+    .main-menu-navbar .dropdown-toggle::after {
+        margin-right: 8px;
+        border-top-color: white;
+    }
+    @@media (max-width: 991px) {
+        .main-menu-navbar {
+            padding: 10px 0;
+        }
+        .main-menu-navbar .navbar-nav {
+            flex-direction: column;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .main-menu-navbar .nav-item {
+            width: 100%;
+        }
+        .main-menu-navbar .nav-link {
+            padding: 15px 20px !important;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            width: 100%;
+            justify-content: space-between;
+        }
+        .main-menu-navbar .nav-link:hover,
+        .main-menu-navbar .nav-link:focus {
+            background-color: rgba(255,255,255,0.2);
+        }
+        .main-menu-navbar .dropdown-toggle::after {
+            margin-right: 0;
+            margin-left: auto;
+        }
+        .main-menu-navbar .dropdown-menu {
+            position: static !important;
+            float: none;
+            width: 100%;
+            margin-top: 0;
+            box-shadow: none;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 0;
+            padding: 0;
+        }
+        .main-menu-navbar .dropdown-item {
+            color: white;
+            padding: 12px 40px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .main-menu-navbar .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.15);
+            color: white;
+            padding-right: 45px;
+        }
+        .main-menu-navbar .dropdown-item i {
+            color: white;
+        }
+        .main-menu-navbar .navbar-toggler {
+            margin-left: auto;
+            padding: 8px 12px;
+        }
+    }
+</style>
+
+<script src="~/js/public.menu.js" asp-location="Footer"></script>
+<script asp-location="Footer">
+    mainMenu.init('.menu-container .menu__toggle, .menu-container .menu__item-toggle', 'menu-dropdown--active');
+</script>
+
+<nav class="navbar navbar-expand-lg main-menu-navbar">
+    <div class="container-fluid">
+        <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#mainMenu-@Model.Id" 
+                aria-controls="mainMenu-@Model.Id" aria-expanded="false" aria-label="Toggle navigation"
+                style="border: 1px solid rgba(255,255,255,0.3); color: white;">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="mainMenu-@Model.Id">
+            <ul class="navbar-nav">
+                @foreach (var menuItem in Model.Items)
+                {
+                    @if (menuItem.ChildrenItems.Any())
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="@(string.IsNullOrEmpty(menuItem.Url) ? "#" : menuItem.Url)" 
+                               id="dropdown-@menuItem.Id" role="button" 
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-chevron-down"></i>
+                                @menuItem.Title
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown-@menuItem.Id">
+                                @foreach (var childItem in menuItem.ChildrenItems)
+                                {
+                                    <a class="dropdown-item" href="@(string.IsNullOrEmpty(childItem.Url) ? "#" : childItem.Url)">
+                                        <i class="fas fa-circle" style="font-size: 6px;"></i>
+                                        @childItem.Title
+                                    </a>
+                                }
+                            </div>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="@(string.IsNullOrEmpty(menuItem.Url) ? "#" : menuItem.Url)">
+                                @menuItem.Title
+                            </a>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+    </div>
+</nav>

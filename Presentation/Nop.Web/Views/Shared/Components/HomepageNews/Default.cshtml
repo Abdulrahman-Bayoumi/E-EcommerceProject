@@ -1,0 +1,57 @@
+﻿@model HomepageNewsItemsModel
+
+@using Nop.Core.Domain.News
+
+@if (Model.NewsItems.Count > 0)
+{
+    <section class="news-list-homepage mb-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="text-center" style="font-size: 28px; font-weight: 600; color: #333; margin-bottom: 30px;">
+                        <i class="fas fa-newspaper mr-2 text-primary"></i>@T("News")
+                    </h2>
+                </div>
+            </div>
+            <div class="row">
+                @foreach (var item in Model.NewsItems)
+                {
+                    <div class="col-12 col-md-6 col-lg-4 mb-4">
+                        <article class="card h-100 shadow-sm" style="border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; transition: all 0.3s ease;"
+                                onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.15)';"
+                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)';">
+                            <div class="card-body">
+                                <header class="mb-3">
+                                    <a class="text-decoration-none" href="@(await NopUrl.RouteGenericUrlAsync<NewsItem>(new { SeName = item.SeName }))">
+                                        <h3 style="font-size: 18px; font-weight: 600; color: #333; margin-bottom: 10px; line-height: 1.4;">
+                                            @item.Title
+                                        </h3>
+                                    </a>
+                                    <time datetime="@item.CreatedOn.ToString("yyyy-MM-dd")" class="text-muted" style="font-size: 14px;">
+                                        <i class="fas fa-calendar-alt mr-1"></i>@item.CreatedOn.ToString("D")
+                                    </time>
+                                </header>
+                                <section class="news-body mb-3" style="color: #666; line-height: 1.6; font-size: 14px;">
+                                    @Html.Raw(item.Short)
+                                </section>
+                                <footer>
+                                    <a href="@(await NopUrl.RouteGenericUrlAsync<NewsItem>(new { SeName = item.SeName }))" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        @T("News.MoreInfo") <i class="fas fa-arrow-left ml-1"></i>
+                                    </a>
+                                </footer>
+                            </div>
+                        </article>
+                    </div>
+                }
+            </div>
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="@Url.RouteUrl(NopRouteNames.General.NEWS)" class="btn btn-primary">
+                        <i class="fas fa-eye mr-1"></i>@T("News.ViewAll")
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+}

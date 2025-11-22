@@ -1,0 +1,177 @@
+﻿@model HeaderLinksModel
+@using Nop.Core.Domain.Customers
+@inject Nop.Core.IWebHelper webHelper
+
+<style>
+    .header-links ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .header-links li {
+        margin: 0;
+    }
+    .header-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 500;
+        color: #495057;
+        transition: all 0.2s ease;
+        background: white;
+        border: 1px solid #dee2e6;
+    }
+    .header-links a:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+    .header-links a i {
+        font-size: 12px;
+    }
+    #topcartlink a {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+    }
+    #topcartlink a:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        color: white;
+    }
+    .header-links .cart-qty,
+    .header-links .wishlist-qty,
+    .header-links .inbox-unread {
+        background: rgba(255,255,255,0.3);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+</style>
+<div class="header-links">
+    <ul>
+        @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderLinksBefore, additionalData = Model })
+        @if (Model.IsAuthenticated)
+        {
+            <li>
+                <a href="@Url.RouteUrl(NopRouteNames.General.CUSTOMER_INFO)" class="ico-account">
+                    <i class="fas fa-user"></i>
+                    <span>@T("Account.MyAccount")</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.RouteUrl(NopRouteNames.Standard.LOGOUT)" class="ico-logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>@T("Account.Logout")</span>
+                </a>
+            </li>
+        }
+        else
+        {
+            var returnUrl = Context.Request.Query.TryGetValue("returnUrl", out var url) && !StringValues.IsNullOrEmpty(url)
+                ? url.ToString()
+                : webHelper.GetRawUrl(Context.Request);
+
+            @if (Model.RegistrationType != UserRegistrationType.Disabled)
+            {
+                <li>
+                    <a href="@Url.RouteUrl(NopRouteNames.Standard.REGISTER, new { returnUrl })" class="ico-register">
+                        <i class="fas fa-user-plus"></i>
+                        <span>@T("Account.Register")</span>
+                    </a>
+                </li>
+            }
+            <li>
+                <a href="@Url.RouteUrl(NopRouteNames.General.LOGIN, new { returnUrl })" class="ico-login">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>@T("Account.Login")</span>
+                </a>
+            </li>
+        }
+        @if (Model.AllowPrivateMessages)
+        {
+            <li>
+                <a href="@Url.RouteUrl(NopRouteNames.Standard.PRIVATE_MESSAGES, new { tab = "" })" class="ico-inbox">
+                    <i class="fas fa-envelope"></i>
+                    <span class="inbox-label">@T("PrivateMessages.Inbox")</span>
+                    @if (!string.IsNullOrEmpty(Model.UnreadPrivateMessages))
+                    {
+                        <span class="inbox-unread">@Model.UnreadPrivateMessages</span>
+                    }
+                </a>
+            </li>
+        }
+        @if (Model.WishlistEnabled)
+        {
+            <li>
+                <a href="@Url.RouteUrl(NopRouteNames.General.WISHLIST)" class="ico-wishlist">
+                    <i class="fas fa-heart"></i>
+                    <span class="wishlist-label">@T("Wishlist")</span>
+                    <span class="wishlist-qty">@T("Wishlist.HeaderQuantity", Model.WishlistItems)</span>
+                </a>
+            </li>
+        }
+        @if (Model.ShoppingCartEnabled)
+        {
+            <li id="topcartlink">
+                <a href="@Url.RouteUrl(NopRouteNames.General.CART)" class="ico-cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-label">@T("ShoppingCart")</span>
+                    <span class="cart-qty">@T("ShoppingCart.HeaderQuantity", Model.ShoppingCartItems)</span>
+                </a>
+            </li>
+        }
+        @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderLinksAfter, additionalData = Model })
+    </ul>
+    @if (Model.AllowPrivateMessages && !string.IsNullOrEmpty(Model.AlertMessage))
+    {
+        //new private message notification
+        <script asp-location="Footer">
+            $(function() {
+                displayPopupNotification('@Html.Raw(JavaScriptEncoder.Default.Encode(Model.AlertMessage))', 'success', false);
+            });
+        </script>
+    }
+    @if (Model.ShoppingCartEnabled)
+    {
+        <script asp-location="Footer">
+            $(function() {
+                $('.header-upper').on({
+                    focus: function(){
+                        $('#flyout-cart').addClass('active');
+                    },
+                    focusout: function() {
+                        setTimeout(function() {
+                            if (!$('#topcartlink, #flyout-cart').find(':focus').length) {
+                                $('#flyout-cart').removeClass('active');
+                            }
+                        }, 0)
+                    },
+                    mouseenter: function() {
+                        $('#flyout-cart').addClass('active');
+                    },
+                    mouseleave: function() {
+                        $('#flyout-cart').removeClass('active');
+                    }
+                }, '#topcartlink, #flyout-cart');
+
+                var localized_data = {
+                    AjaxCartFailure: "@T("AjaxCart.Failure")"
+                };
+
+                AjaxCart.init(@Model.UsePopupNotifications.ToString().ToLowerInvariant(), '.header-links .cart-qty', '.header-links .wishlist-qty', '#flyout-cart', localized_data);
+            });
+        </script>
+    }
+</div>

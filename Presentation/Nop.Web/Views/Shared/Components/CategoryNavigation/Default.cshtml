@@ -1,0 +1,126 @@
+﻿@model CategoryNavigationModel
+
+@using Nop.Core.Domain.Catalog
+
+@functions {
+    bool BreadCrumbContainsCurrentCategoryId(CategorySimpleModel category)
+    {
+        if (Model.CurrentCategoryId == 0)
+            return false;
+
+        if (category.Id == Model.CurrentCategoryId)
+            return true;
+
+        foreach (var subCategory in category.SubCategories)
+        {
+            if (BreadCrumbContainsCurrentCategoryId(subCategory))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    async Task CategoryLine(CategoryNavigationModel.CategoryLineModel lineModel, int level = 0)
+    {
+        var active = lineModel.Category.Id == lineModel.CurrentCategoryId || lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0;
+        var last = lineModel.Category.Id == lineModel.CurrentCategoryId;
+        var hasSubCategories = lineModel.Category.SubCategories.Count > 0;
+        var shouldShowSubCategories = lineModel.Category.Id == lineModel.CurrentCategoryId ||
+            lineModel.Category.SubCategories.Count(BreadCrumbContainsCurrentCategoryId) > 0;
+        var isSubCategory = level > 0;
+
+        <li class="category-item @(active && !isSubCategory ? "active" : "") @(isSubCategory ? "subcategory" : "")" style="list-style: none;">
+            <div class="d-flex align-items-center @(active && !isSubCategory ? "bg-primary text-white" : "bg-white text-dark")" 
+                 style="padding: 12px 15px; @(active && !isSubCategory ? "" : "border-bottom: 1px solid #f0f0f0;") cursor: pointer; transition: background-color 0.2s ease;"
+                 onmouseover="if(!this.classList.contains('bg-primary')) this.style.backgroundColor='#f8f9fa';"
+                 onmouseout="if(!this.classList.contains('bg-primary')) this.style.backgroundColor='white';">
+                @if (hasSubCategories)
+                {
+                    <button class="btn btn-link p-0 mr-2 @(active && !isSubCategory ? "text-white" : "text-muted")" 
+                            type="button" 
+                            data-toggle="collapse" 
+                            data-target="#subcategories-@lineModel.Category.Id"
+                            aria-expanded="@shouldShowSubCategories.ToString().ToLower()"
+                            aria-controls="subcategories-@lineModel.Category.Id"
+                            style="border: none; background: none; outline: none; min-width: 20px; text-align: left;">
+                        <i class="fas fa-chevron-@(shouldShowSubCategories ? "down" : "right")" style="font-size: 11px;"></i>
+                    </button>
+                }
+                else if (!isSubCategory)
+                {
+                    <span class="mr-2" style="width: 20px; display: inline-block;"></span>
+                }
+                <a href="@(await NopUrl.RouteGenericUrlAsync<Category>(new { SeName = lineModel.Category.SeName }))" 
+                   class="flex-grow-1 text-decoration-none @(active && !isSubCategory ? "text-white font-weight-bold" : "text-dark") d-flex align-items-center justify-content-between"
+                   style="transition: all 0.2s ease;"
+                   onmouseover="this.style.opacity='0.8';"
+                   onmouseout="this.style.opacity='1';">
+                    <span style="flex-grow: 1;">@lineModel.Category.Name</span>
+                    <i class="fas fa-folder @(active && !isSubCategory ? "text-white" : "text-secondary")" style="font-size: 14px; margin-left: 10px; opacity: 0.7;"></i>
+                </a>
+            </div>
+            @if (hasSubCategories)
+            {
+                <div class="collapse @(shouldShowSubCategories ? "show" : "")" id="subcategories-@lineModel.Category.Id">
+                    <ul class="subcategory-list" style="padding: 0; margin: 0; background: white; @(isSubCategory ? "padding-left: 25px;" : "")">
+                        @foreach (var subCategory in lineModel.Category.SubCategories)
+                        {
+                            var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
+                            {
+                                CurrentCategoryId = lineModel.CurrentCategoryId,
+                                Category = subCategory
+                            };
+                            await CategoryLine(categoryLineModel, level + 1);
+                        }
+                    </ul>
+                </div>
+            }
+        </li>
+    }
+}
+
+@if (Model.Categories.Count > 0)
+{
+    <section class="block block-category-navigation mb-4">
+        <style>
+            .block-category-navigation .category-item.active > div {
+                background-color: #007bff !important;
+                color: white !important;
+            }
+            .block-category-navigation .category-item.subcategory > div {
+                background-color: white !important;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            .block-category-navigation .category-item.subcategory > div:hover {
+                background-color: #f8f9fa !important;
+            }
+            .block-category-navigation a {
+                color: inherit;
+            }
+            .block-category-navigation a:hover {
+                text-decoration: none;
+            }
+        </style>
+        <div style="border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div class="bg-primary text-white d-flex align-items-center" style="padding: 12px 15px; font-weight: 500; font-size: 16px;">
+                <i class="fas fa-bars" style="margin-left: 10px; font-size: 16px;"></i>
+                <span style="flex-grow: 1;">@T("Categories")</span>
+            </div>
+            <div style="background: white;">
+                <ul style="padding: 0; margin: 0; list-style: none;">
+                    @foreach (var category in Model.Categories)
+                    {
+                        var categoryLineModel = new CategoryNavigationModel.CategoryLineModel
+                        {
+                            CurrentCategoryId = Model.CurrentCategoryId,
+                            Category = category
+                        };
+                        await CategoryLine(categoryLineModel);
+                    }
+                </ul>
+            </div>
+        </div>
+    </section>
+}

@@ -1,0 +1,12 @@
+﻿@model PollModel
+<section class="block block-poll mb-4">
+    <div style="border: 1px solid #e0e0e0; border-radius: 4px; overflow: hidden; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <div class="bg-primary text-white d-flex align-items-center" style="padding: 12px 15px; font-weight: 500; font-size: 16px;">
+            <i class="fas fa-poll mr-2"></i>
+            <span style="flex-grow: 1;">@T("Polls.Title")</span>
+        </div>
+        <div style="background: white; padding: 15px;">
+            @await Html.PartialAsync("_Poll", Model)
+        </div>
+    </div>
+</section>

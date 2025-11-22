@@ -1,0 +1,119 @@
+﻿@model AdminHeaderLinksModel
+@if (Model.IsCustomerImpersonated || Model.DisplayAdminLink)
+{
+    <style>
+        .admin-header-links {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 6px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+        }
+        .admin-header-links .admin-link-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            margin: 0 4px;
+        }
+        .admin-header-links .admin-link-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .admin-header-links .admin-link-item i {
+            font-size: 12px;
+        }
+        .admin-header-links .impersonate-banner {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 6px 14px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 4px;
+            box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+        }
+        .admin-header-links .impersonate-banner .impersonate-text {
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .admin-header-links .impersonate-banner .finish-btn {
+            background: white;
+            color: #f5576c;
+            padding: 5px 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 11px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .admin-header-links .impersonate-banner .finish-btn:hover {
+            background: #f5576c;
+            color: white;
+            transform: scale(1.05);
+        }
+        .admin-header-links .admin-link-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .admin-header-links .admin-link-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+        }
+        .admin-header-links .admin-link-secondary {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .admin-header-links .admin-link-secondary:hover {
+            background: rgba(255,255,255,0.25);
+            color: white;
+            border-color: rgba(255,255,255,0.5);
+        }
+    </style>
+    <nav class="admin-header-links">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-center align-items-center flex-wrap">
+                @if (Model.IsCustomerImpersonated)
+                {
+                    <div class="impersonate-banner">
+                        <i class="fas fa-user-secret" style="color: white; font-size: 14px;"></i>
+                        <span class="impersonate-text">
+                            @string.Format(T("Account.ImpersonatedAs").Text, Model.ImpersonatedCustomerName)
+                        </span>
+                        <a href="@Url.RouteUrl(NopRouteNames.Standard.LOGOUT)" 
+                           class="finish-btn" 
+                           title="@T("Account.ImpersonatedAs.Finish.Hint")">
+                            <i class="fas fa-times"></i>@T("Account.ImpersonatedAs.Finish")
+                        </a>
+                    </div>
+                }
+                @if (Model.DisplayAdminLink)
+                {
+                    <a href="@Url.Content("~/Admin")" 
+                       class="admin-link-item admin-link-primary">
+                        <i class="fas fa-cog"></i>
+                        <span>@T("Account.Administration")</span>
+                    </a>
+                }
+                @if (!string.IsNullOrEmpty(Model.EditPageUrl))
+                {
+                    <a href="@Model.EditPageUrl" 
+                       class="admin-link-item admin-link-secondary">
+                        <i class="fas fa-edit"></i>
+                        <span>@T("Common.ManagePage")</span>
+                    </a>
+                }
+                @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.AdminHeaderLinksAfter, additionalData = Model })
+            </div>
+        </div>
+    </nav>
+}

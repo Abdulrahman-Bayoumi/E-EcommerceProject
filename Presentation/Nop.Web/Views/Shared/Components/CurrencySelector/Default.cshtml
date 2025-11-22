@@ -1,0 +1,59 @@
+﻿@model CurrencySelectorModel
+
+@inject Nop.Core.IWebHelper webHelper
+
+@if (Model.AvailableCurrencies.Count > 1)
+{
+    <style>
+        .currency-selector {
+            position: relative;
+        }
+        .currency-selector select {
+            padding: 6px 35px 6px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #212529;
+            font-weight: 500;
+            min-width: 160px;
+            width: auto;
+            max-width: 240px;
+            line-height: 1.4;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23667eea' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 10px;
+        }
+        .currency-selector select option {
+            padding: 10px;
+            color: #212529;
+            font-weight: 500;
+            background: white;
+        }
+        .currency-selector select:hover {
+            border-color: #667eea;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.2);
+        }
+        .currency-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+    </style>
+    <div class="currency-selector">
+        @{
+            var returnUrl = webHelper.GetRawUrl(Context.Request);
+            var currencies = await Model.AvailableCurrencies.SelectAwait(async x => new SelectListItem
+            {
+                Text = !Model.DisplayCurrencySymbol ? x.Name : T("Currency.Selector.Text.Pattern", x.Name, x.CurrencySymbol).Text,
+                Value = Url.RouteUrl(NopRouteNames.Standard.CHANGE_CURRENCY, new { customercurrency = x.Id, returnUrl }, webHelper.GetCurrentRequestProtocol()),
+                Selected = x.Id.Equals(Model.CurrentCurrencyId)
+            }).ToListAsync();
+            <select id="customerCurrency" name="customerCurrency" asp-items="@currencies" onchange="setLocation(this.value);" aria-label="@T("Currency.Selector.Label")"></select>
+        }
+    </div>
+}
